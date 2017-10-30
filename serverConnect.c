@@ -40,16 +40,65 @@ void close_tcp(struct connection *conn){
 }
 
 
-void connect_TLS(struct connection *conn){
+int connect_TLS(struct connection *conn, char *trustfile, char *servername, size_t sname_len){
   if(gnutls_check_version("3.4.6") == NULL){
     fprintf(stderr, "GNUtls 3.4.6 Is required.\n");
-    exit();
+    return 0;
   }
 
   if(gnutls_global_init() <= 0){
     fprintf(stderr, "GNUtls failed to initialize\n");
-    exit();
+    return 0;
   }
 
+  if(gnutls_certificate_allocate_credentials(&(conn->xcred)) <= 0){
+    fprintf(stderr, "GNUtls Error allocating credentials\n");
+    return 0;
+  }
+
+  if(gnutls_certificate_set_x509_trust_file(conn->xcred,
+					    trustfile,
+					    GNUTLS_X509_FMT_PEM) <= 0){
+    fprintf(stderr, "GNUtls Error setting trust file\n");
+    return 0;
+  }
+
+  if(gnutls_init(&(conn->session), GNUTLS_CLIENT) <= 0){
+    fprintf(stderr, "GNUtls Error on session init\n");
+    return 0;
+  }
+
+  if(gnutls_server_name_set(conn->session, GNUTLS_NAME_DNS, servername, sname_len) <= 0){
+    fprintf(stderr, "GNUtls Error setting server name\n");
+    return 0;
+  }
+
+  if(gnutls_set_default_priority(conn->session) <= 0){
+    fprintf(stderr, "GNUtls Error setting priority\n");
+    return 0;
+  }
+
+  if(gnutls_credentials_set(conn->session, GNUTLS_CRD_CERTIFICATE, conn->xcred) <= 0){
+    fprintf(stderr, "GNUtls Error setting credentials\n");
+    return 0;
+  }
+
+  open_tcp(conn);
+
+  gnutls_transport_set_int(conn->session, conn->sockfd);
+  gnutls_handshake_set_timeout(conn->session, GNUTLS_DEFAULT_HANDSHAKE_TIMEOUT);
+
+
+  int ret;
+  do{
+    ret = gnutls_handshake(conn->session);
+  } while (ret < 0 && gnutls_error_is_fatal(ret) == 0);
+  if(ret < 0){
+    fprintf(stderr, "GNUtls Hanshake Failed\n");
+    return 0;
+  }
+
+
+  return 1;
 
 }

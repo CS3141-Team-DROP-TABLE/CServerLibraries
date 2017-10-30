@@ -15,7 +15,7 @@ struct connection{
   struct sockaddr_in sa;
   int sockfd;
   gnutls_certificate_credentials_t xcred;
-  gnutl_session_t session;
+  gnutls_session_t session;
 };
 
 
