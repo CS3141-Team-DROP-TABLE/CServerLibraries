@@ -12,6 +12,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <errno.h>
+
 #include <ping.h>
 #include <linkedList.h>
 
@@ -27,28 +29,28 @@ unsigned short calc_cksum(unsigned short *data, size_t len){
   unsigned short *marker = data;
   size_t bytes_left = len;
 
-  /*
-   * Sum all the 16 bit ints
-   */
+  
+  // Sum all the 16 bit ints
+  
   while(bytes_left > 1){
     sum += *marker++;
     bytes_left -= 2;
   }
 
-  /*
-   * Deal with remaining byte
-   */
+  
+  // Deal with remaining byte
+   
 
   if(bytes_left == 1){
     *(unsigned char*)(&output) = *(unsigned char *)marker;
     sum += output;
   }
 
-  /*
-   * Add the upper 16 bits to the lower 16 bits,
-   * add the resulting upper 16 bits,
-   * then truncate any remaining bits
-   */
+  
+   // Add the upper 16 bits to the lower 16 bits,
+   // add the resulting upper 16 bits,
+   // then truncate any remaining bits
+   //
   sum = (sum & 0xffff) + (sum >> 16); 
   sum += (sum >> 16);
   output = ~sum;
@@ -62,7 +64,10 @@ char *create_packet(){
   char *retval = (char*)malloc(sizeof(struct iphdr) + sizeof(struct icmphdr));
   struct iphdr *ip = (struct iphdr*)retval;
   struct icmphdr *icmp = (struct icmphdr*)(retval+sizeof(struct iphdr));
+  memset(ip, 0, sizeof(struct iphdr));
+  memset(icmp, 0xFF, sizeof(struct icmphdr));
 
+  
   ip->ihl = 	5;
   ip->version = 4;
   ip->tos =	0;
@@ -73,13 +78,14 @@ char *create_packet(){
   ip->check =	calc_cksum((unsigned short*)ip, sizeof(struct iphdr));
 
   
-  icmp->type = 		ICMP_ECHO;
+  icmp->type = 	        ICMP_ECHO;
   icmp->code =		0;
   icmp->un.echo.id = 	0;
   icmp->un.echo.sequence = 0;
   icmp->checksum = 0;
   icmp->checksum = calc_cksum((unsigned short*)icmp, sizeof(struct icmphdr));
   
+  printf("ICMP: %d, Checksum: %04x\n", icmp->type, icmp->checksum);
 
   return retval;
 }
@@ -100,9 +106,13 @@ int create_raw_socket(){
   int retval = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 
   int optval;
-  if(retval > 0)
-    setsockopt(retval, IPPROTO_IP, IP_HDRINCL, &optval, sizeof(int));
-
+  if(retval > 0){
+    if(setsockopt(retval, IPPROTO_IP, IP_HDRINCL, &optval, sizeof(int)) != 0){
+      
+      fprintf(stderr, "Error setting socket options: %s \n", strerror(errno)); 
+     
+    }
+  }
   return retval;
 }
 
@@ -115,10 +125,17 @@ int send_ping(char* packet, in_addr_t dst, int sockfd){
   snd_conn.sin_addr.s_addr = dst;
 
 
-  set_dst(packet, dst);
+  //set_dst(packet, dst);
+  struct icmphdr *icmp = (struct icmphdr*)(packet+sizeof(struct iphdr));
+  printf("ICMP: %d, Checksum: %04x\n", icmp->type, icmp->checksum);
 
+  for(int i = 0; i <= sizeof(struct icmphdr); i++){
+    printf("%02x\t", *(char*)((void*)icmp)+i);
+  }
+  printf("\n");
   
   return sendto(sockfd, packet, ip->tot_len, 0, (struct sockaddr*)&snd_conn, sizeof(struct sockaddr));
+  //return send (sockfd, packet, ip->tot_len, 0);
 }
 
 in_addr_t get_ip(char *iface, size_t ifname_len, int sockfd){
@@ -133,5 +150,7 @@ in_addr_t get_ip(char *iface, size_t ifname_len, int sockfd){
    
     return ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
 }
+
+
 
 

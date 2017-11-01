@@ -7,6 +7,7 @@
 
 void ll_initialize(struct list *l){
   l->root = NULL;
+  l->tail = NULL;
   l->size = 0;
   l->mut = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
   pthread_mutex_unlock(&(l->mut));
@@ -100,12 +101,20 @@ void *ll_search_value(struct list *l, void *val, size_t cmp_sz){
 struct list_node *ll_disconnect_node(struct list *l, struct list_node *ln){
   if(l->root == ln)
     l->root = ln->next;
-  if(ln->prev != NULL)
-    ln->prev->next = ln->next;
-  if(ln->next != NULL)
-    ln->next->prev = ln->prev;
   if(l->tail == ln)
     l->tail = ln->prev;
+  
+  if(ln->prev != NULL){
+    ln->prev->next = ln->next;
+  } else if(ln->next != NULL){
+    ln->next->prev = NULL;
+  }
+  
+  if(ln->next != NULL) {
+    ln->next->prev = ln->prev;
+  } else if(ln->prev != NULL){
+    ln->prev->next = NULL;
+  }
   
   l->size--;
   

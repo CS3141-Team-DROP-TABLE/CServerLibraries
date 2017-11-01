@@ -25,11 +25,14 @@
  */
 int open_tcp(struct connection *conn){
   //setup sockaddr for server connection
-  memset(&conn->sa, 0, sizeof(struct sockaddr_in));
+  
+  memset(&(conn->sa), 0, sizeof(struct sockaddr_in));
   conn->sa.sin_family = AF_INET;
   conn->sa.sin_port = htons(conn->port);
-  inet_pton(AF_INET, conn->server, &(conn->sa.sin_addr));
+  inet_pton(AF_INET, (conn->server), &(conn->sa.sin_addr));
 
+  
+  
   //create socket
   conn->sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if(connect(conn->sockfd, (struct sockaddr*)&(conn->sa), sizeof(struct sockaddr_in)) < 0) {
