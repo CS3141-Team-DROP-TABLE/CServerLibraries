@@ -125,15 +125,6 @@ int send_ping(char* packet, in_addr_t dst, int sockfd){
   //set_dst(packet, dst);
   struct icmphdr *icmp = (struct icmphdr*)(packet+sizeof(struct iphdr));
  
-
-  for(int i = 0; i <= sizeof(struct iphdr) + sizeof(struct icmphdr); i++){
-    if(i%8 == 0) printf("\n");
-    printf("%x\t", *(packet)+i);
-  }
-
-  printf("\n");
-  printf("sz %lu, %lu, ICMP: %d, Checksum: %04x\n", sizeof(struct iphdr), sizeof(struct icmphdr), icmp->type, icmp->checksum);
-
   
   return sendto(sockfd, packet, ip->tot_len, 0, (struct sockaddr*)&snd_conn, sizeof(struct sockaddr));
   //return send (sockfd, packet, ip->tot_len, 0);

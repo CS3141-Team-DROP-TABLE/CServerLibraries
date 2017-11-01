@@ -36,7 +36,7 @@ int open_tcp(struct connection *conn){
   //create socket
   conn->sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if(connect(conn->sockfd, (struct sockaddr*)&(conn->sa), sizeof(struct sockaddr_in)) < 0) {
-    strerror(errno);
+    printf("Error creating socket: %s\n", strerror(errno));
   }
 
   return conn->sockfd;
