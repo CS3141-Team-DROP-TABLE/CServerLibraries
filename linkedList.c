@@ -249,3 +249,22 @@ void *ll_pq_dequeue(struct list *l){
 
   return ret;
 }
+
+
+void ll_queue_list(struct list *l, struct list *queue){
+  struct list_node *mk;
+
+  pthread_mutex_lock(&l->mut);
+  pthread_mutex_lock(&queue->mut);
+  mk = l->root;
+
+  while(mk != NULL){
+    ll_pq_enqueue(queue, mk->val, 0);
+    mk = mk->next;
+  }
+
+  
+  pthread_mutex_unlock(&l->mut);
+  pthread_mutex_unlock(&queue->mut);
+
+}

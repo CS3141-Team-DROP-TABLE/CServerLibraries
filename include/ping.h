@@ -11,17 +11,8 @@
 
 #include <linkedList.h>
 
- 
-
-
 struct target{
   in_addr_t addr;
-};
-
-struct ping_th_args{
-  struct list *queue;
-  in_addr_t src;
-  int sockfd;
 };
 
 char *create_packet();

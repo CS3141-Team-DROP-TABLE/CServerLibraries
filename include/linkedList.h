@@ -31,7 +31,7 @@ void *ll_remove_root(struct list *l);
 struct list_node *ll_remove_last_node(struct list *l);
 struct list_node *ll_pq_enqueue(struct list *l, void *val, int priority);
 void *ll_pq_dequeue(struct list *l);
-
+void ll_queue_list(struct list *l, struct list *queue);
 
 
 #endif

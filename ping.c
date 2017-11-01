@@ -106,7 +106,7 @@ int create_raw_socket(){
 
 
 int set_sock_opt(int sockfd){
-  int optval;
+  int optval = 1;
   if(setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL, &optval, sizeof(int)) != 0){
     fprintf(stderr, "Error setting socket options: %s \n", strerror(errno)); 
     
@@ -122,7 +122,7 @@ int send_ping(char* packet, in_addr_t dst, int sockfd){
   snd_conn.sin_addr.s_addr = dst;
 
 
-  //set_dst(packet, dst);
+  set_dst(packet, dst);
   struct icmphdr *icmp = (struct icmphdr*)(packet+sizeof(struct iphdr));
  
   
