@@ -15,6 +15,14 @@
 #include <serverConnect.h>
 
 
+/**
+ * Open a TCP connection to a server. 
+ * Args:
+ *	conn: a connection struct with port and server set
+ *          conn.port is an integer representing the port to connect to
+ *	    conn.server is a string litteral containing the ip of the destination
+ *                      (x.x.x.x)
+ */
 int open_tcp(struct connection *conn){
   //setup sockaddr for server connection
   memset(&conn->sa, 0, sizeof(struct sockaddr_in));
@@ -33,6 +41,12 @@ int open_tcp(struct connection *conn){
 
 
 
+/**
+ * Open a TCP connection to a server. 
+ * Args:
+ *	conn: a connection struct of an open connection
+ *
+ */
 void close_tcp(struct connection *conn){
   shutdown(conn->sockfd, SHUT_RDWR);
   close(conn->sockfd);
@@ -40,18 +54,29 @@ void close_tcp(struct connection *conn){
 }
 
 
+/**
+ * Makes a TLS connection on an open TCP socket.
+ * Args:
+ *	conn: a connection struct of an open tcp connection
+ *	trustfile: a string containing the path of the trustfile
+ *	servername: a string containing the name that the server's cert is signed with
+ *	sname_len: the length of the server name
+ *
+ * Return:
+ * 	Returns 1 on success, 0 on failure.
+ */
 int connect_TLS(struct connection *conn, char *trustfile, char *servername, size_t sname_len){
   if(gnutls_check_version("3.4.6") == NULL){
     fprintf(stderr, "GNUtls 3.4.6 Is required.\n");
     return 0;
   }
 
-  if(gnutls_global_init() <= 0){
+  if(gnutls_global_init() != 0){
     fprintf(stderr, "GNUtls failed to initialize\n");
     return 0;
   }
 
-  if(gnutls_certificate_allocate_credentials(&(conn->xcred)) <= 0){
+  if(gnutls_certificate_allocate_credentials(&(conn->xcred)) != GNUTLS_E_SUCCESS){
     fprintf(stderr, "GNUtls Error allocating credentials\n");
     return 0;
   }
@@ -63,22 +88,22 @@ int connect_TLS(struct connection *conn, char *trustfile, char *servername, size
     return 0;
   }
 
-  if(gnutls_init(&(conn->session), GNUTLS_CLIENT) <= 0){
+  if(gnutls_init(&(conn->session), GNUTLS_CLIENT) != GNUTLS_E_SUCCESS){
     fprintf(stderr, "GNUtls Error on session init\n");
     return 0;
   }
 
-  if(gnutls_server_name_set(conn->session, GNUTLS_NAME_DNS, servername, sname_len) <= 0){
+  if(gnutls_server_name_set(conn->session, GNUTLS_NAME_DNS, servername, sname_len) != GNUTLS_E_SUCCESS){
     fprintf(stderr, "GNUtls Error setting server name\n");
     return 0;
   }
 
-  if(gnutls_set_default_priority(conn->session) <= 0){
+  if(gnutls_set_default_priority(conn->session)  != GNUTLS_E_SUCCESS){
     fprintf(stderr, "GNUtls Error setting priority\n");
     return 0;
   }
 
-  if(gnutls_credentials_set(conn->session, GNUTLS_CRD_CERTIFICATE, conn->xcred) <= 0){
+  if(gnutls_credentials_set(conn->session, GNUTLS_CRD_CERTIFICATE, conn->xcred)  != GNUTLS_E_SUCCESS){
     fprintf(stderr, "GNUtls Error setting credentials\n");
     return 0;
   }
@@ -100,5 +125,50 @@ int connect_TLS(struct connection *conn, char *trustfile, char *servername, size
 
 
   return 1;
+}
 
+
+/**
+ * Sends bytes on an encrypted socket
+ * Args:
+ *	conn: a connection struct containing an open TCP connection that has had TLS established
+ *	msg: a pointer to the message
+ *	msg_sz: the number of bytes in the message
+ */
+int tls_send(struct connection *conn, char *msg, size_t msg_sz){
+  return gnutls_record_send(conn->session, msg, msg_sz);
+}
+
+/**
+ * recives bytes from an encrypted socket
+ * Args:
+ *	conn: a connection struct containing an open TCP connection that has had TLS established
+ * 	buffer: the destination for the read data
+ *	buf_sz: the maximum number of bytes to read
+ *
+ * Return:
+ *	Returns the number of bytes read. 0 on EOF, negative on Error.
+ */
+int tls_recv(struct connection *conn, char *buffer, size_t buf_sz){
+  return gnutls_record_recv(conn->session, buffer, buf_sz);
+}
+
+
+/**
+ * Disconnect TLS from a socket
+ * Args:
+ * 	conn: a connection struct containing an open TCP connection that has had TLS established
+ */
+void disconnect_tls(struct connection *conn){
+  gnutls_bye(conn->session, GNUTLS_SHUT_RDWR);
+  gnutls_deinit(conn->session);
+  conn->session = NULL;
+  gnutls_certificate_free_credentials(conn->xcred);
+}
+
+/**
+ * Calls gnutls_global_deinit()
+ */
+void deinit_tls(){
+  gnutls_global_deinit();
 }

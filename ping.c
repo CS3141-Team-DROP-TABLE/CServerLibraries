@@ -38,10 +38,10 @@ unsigned short calc_cksum(unsigned short *data, size_t len){
   /*
    * Deal with remaining byte
    */
-  unsigned char tmp;
+
   if(bytes_left == 1){
-    *(unsigned char*)(&tmp) = *(unsigned char *)marker;
-    sum += tmp;
+    *(unsigned char*)(&output) = *(unsigned char *)marker;
+    sum += output;
   }
 
   /*
@@ -135,43 +135,3 @@ in_addr_t get_ip(char *iface, size_t ifname_len, int sockfd){
 }
 
 
-void *recv_loop(void *sockfd){
-  char buffer[1024];
-  int ret;
-  struct iphdr *ip = (struct iphdr*)buffer;
-  struct sockaddr_in rec_str;
-  while(1){
-    ret = recv(*(int*)sockfd, buffer, 1024, 0);
-    if(ret >= 0){
-      rec_str.sin_addr.s_addr = ip->saddr;
-      printf("ping received of size %d from %s\n\n", ret, inet_ntoa(rec_str.sin_addr));
-    }
-    usleep(75);
-
-  }
-
-}
-
-
-void *ping_loop(void *argsin){
-  struct list *queue = ((struct ping_th_args*)argsin)->queue;
-  int sockfd = ((struct ping_th_args*)argsin)->sockfd;
-
-  char *pkt = create_packet();
-  set_src(pkt, ((struct ping_th_args*)argsin)->src);
-  
-  struct target *t;
-  while(1){
-    t = (struct target*)ll_pq_dequeue(queue);
-    if(t == NULL){
-      usleep(750);
-    }else if(t->addr == 0){
-      free(t);
-      break;
-    }else{
-      send_ping(pkt, t->addr, sockfd);
-      free(t);
-    }
-  }
-
-}
