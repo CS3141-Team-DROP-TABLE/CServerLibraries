@@ -28,6 +28,7 @@ char *create_packet();
 void set_src(char *packet, in_addr_t src);
 void set_dst(char *packet, in_addr_t dst);
 int create_raw_socket();
+int set_sock_opt(int sockfd);
 int send_ping(char* packet, in_addr_t dst, int sockfd);
 in_addr_t get_ip(char *iface, size_t ifname_len, int sockfd);
 void *recv_loop(void *sockfd);

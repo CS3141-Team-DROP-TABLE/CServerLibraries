@@ -65,7 +65,7 @@ char *create_packet(){
   struct iphdr *ip = (struct iphdr*)retval;
   struct icmphdr *icmp = (struct icmphdr*)(retval+sizeof(struct iphdr));
   memset(ip, 0, sizeof(struct iphdr));
-  memset(icmp, 0xFF, sizeof(struct icmphdr));
+  memset(icmp, 0x00, sizeof(struct icmphdr));
 
   
   ip->ihl = 	5;
@@ -84,8 +84,6 @@ char *create_packet(){
   icmp->un.echo.sequence = 0;
   icmp->checksum = 0;
   icmp->checksum = calc_cksum((unsigned short*)icmp, sizeof(struct icmphdr));
-  
-  printf("ICMP: %d, Checksum: %04x\n", icmp->type, icmp->checksum);
 
   return retval;
 }
@@ -103,19 +101,18 @@ void set_dst(char *packet, in_addr_t dst){
 
 
 int create_raw_socket(){
-  int retval = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-
-  int optval;
-  if(retval > 0){
-    if(setsockopt(retval, IPPROTO_IP, IP_HDRINCL, &optval, sizeof(int)) != 0){
-      
-      fprintf(stderr, "Error setting socket options: %s \n", strerror(errno)); 
-     
-    }
-  }
-  return retval;
+  return socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 }
 
+
+int set_sock_opt(int sockfd){
+  int optval;
+  if(setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL, &optval, sizeof(int)) != 0){
+    fprintf(stderr, "Error setting socket options: %s \n", strerror(errno)); 
+    
+  }
+  return optval;
+}
 
 int send_ping(char* packet, in_addr_t dst, int sockfd){
   struct iphdr *ip = (struct iphdr*)packet;
@@ -127,12 +124,16 @@ int send_ping(char* packet, in_addr_t dst, int sockfd){
 
   //set_dst(packet, dst);
   struct icmphdr *icmp = (struct icmphdr*)(packet+sizeof(struct iphdr));
-  printf("ICMP: %d, Checksum: %04x\n", icmp->type, icmp->checksum);
+ 
 
-  for(int i = 0; i <= sizeof(struct icmphdr); i++){
-    printf("%02x\t", *(char*)((void*)icmp)+i);
+  for(int i = 0; i <= sizeof(struct iphdr) + sizeof(struct icmphdr); i++){
+    if(i%8 == 0) printf("\n");
+    printf("%x\t", *(packet)+i);
   }
+
   printf("\n");
+  printf("sz %lu, %lu, ICMP: %d, Checksum: %04x\n", sizeof(struct iphdr), sizeof(struct icmphdr), icmp->type, icmp->checksum);
+
   
   return sendto(sockfd, packet, ip->tot_len, 0, (struct sockaddr*)&snd_conn, sizeof(struct sockaddr));
   //return send (sockfd, packet, ip->tot_len, 0);
