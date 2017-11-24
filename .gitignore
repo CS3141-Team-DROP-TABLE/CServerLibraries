@@ -11,3 +11,5 @@ Makefile
 *.cmake
 **/*.dir/
 tests/*_test
+*.a
+
