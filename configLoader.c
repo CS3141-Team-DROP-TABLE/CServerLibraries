@@ -19,16 +19,17 @@ void config_loader_init(struct config *c, size_t max_keysize, size_t max_valsize
 
 }
 
-void config_parse_line(struct config *c, char *line){
-  parse_line(c, line);
-}
-
 void parse_line(struct config *c, char *line){
   char key[c->max_keysz];
   char val[c->max_valsz];
 
   sscanf(line, c->scn_fmt, key, val);
   str_map_insert_str(&c->st, key, val);
+}
+
+
+void config_parse_line(struct config *c, char *line){
+  parse_line(c, line);
 }
 
 
