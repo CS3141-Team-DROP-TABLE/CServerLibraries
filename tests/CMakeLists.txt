@@ -21,3 +21,7 @@ add_executable(stringMap_test stringMap_test.c)
 target_link_libraries(stringMap_test AVL stringMap ${LIBS})
 add_test(stringMap_test ${CMAKE_CURRENT_BINARY_DIR}/stringMap_test)
 
+add_executable(configLoader_test configLoader_test.c)
+target_link_libraries(configLoader_test AVL stringMap configLoader ${LIBS})
+add_test(configLoader_test ${CMAKE_CURRENT_BINARY_DIR}/configLoader_test)
+

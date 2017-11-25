@@ -11,13 +11,16 @@
 int default_cmp(void *a, void *b, size_t max_keysz){
   char *sa = (char*)a;
   char *sb = (char*)b;
-  size_t min = (strnlen(sa, max_keysz) < strnlen(sb, max_keysz))?
+  size_t max = (strnlen(sa, max_keysz) > strnlen(sb, max_keysz))?
 		strnlen(sa, max_keysz):
 		strnlen(sb, max_keysz);
 
-  return strncmp(sa, sb, (min < max_keysz)? min : max_keysz);
+  return strncmp(sa, sb, (max < max_keysz)? max : max_keysz);
 }
 
+void delete(void *a, void *b){
+  free(b);
+}
 
 void str_map_init(struct str_map *s, cmp_func cmp, size_t max_keysz){
   s->cmp = cmp;
@@ -61,4 +64,8 @@ char *str_map_search(struct str_map *s, char *key_str){
 char *str_map_remove(struct str_map *s, char *key_str){
   return avl_remove(&s->avl_tree, key_str, s->cmp, strnlen(key_str, s->max_keysz));
 
+}
+
+void str_clear_all(struct str_map *s){
+  avl_clear_tree(&s->avl_tree, &delete);
 }
