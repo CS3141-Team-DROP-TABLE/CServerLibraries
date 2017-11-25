@@ -19,5 +19,5 @@ void load_config(struct config *c, char *filename);
 char *get_config(struct config *c, char *key);
 void clear_config(struct config *c);
 char *remove_config(struct config *c, char *key);
-void parse_line(struct config *c, char *line);
+void config_parse_line(struct config *c, char *line);
 #endif
