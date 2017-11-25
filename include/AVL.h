@@ -31,10 +31,8 @@ struct tree{
 typedef int (*cmp_func)(void *, void *, size_t cmp_sz);
 
 void avl_init(struct tree *t);
-
-
-//TMP
-struct tree_node *create_node(void *key, void *val);
-int insert(struct tree *t, struct tree_node *n, cmp_func cmp, size_t cmp_sz);
-
+void *avl_insert(struct tree *t, void *key, void *value, cmp_func cmp, size_t cmp_sz);
+void* avl_remove(struct tree *t, void *key, cmp_func cmp, size_t cmp_sz);
+void *avl_search(struct tree *t, void *key, cmp_func cmp, size_t cmp_sz);
+int avl_verify_tree(struct tree *t, cmp_func cmp, size_t cmp_sz);
 #endif
