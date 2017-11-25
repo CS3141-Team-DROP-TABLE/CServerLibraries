@@ -91,11 +91,13 @@ char *create_packet(){
 void set_id(char *packet, u_int16_t id){
   struct icmphdr *icmp = (struct icmphdr*)(packet+sizeof(struct iphdr));
   icmp->un.echo.id = id;
+  icmp->checksum = 0;
+  icmp->checksum =  calc_cksum((unsigned short*)icmp, sizeof(struct icmphdr));
+
 }
 
 void set_src(char *packet, in_addr_t src){
   struct iphdr *ip = (struct iphdr*)packet;
-
   ip->saddr =	src;
 }
 

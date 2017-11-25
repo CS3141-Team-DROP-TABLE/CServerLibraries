@@ -14,6 +14,10 @@ void del(void *a, void *b, void *v){
   free(a);
 }
 
+void app(void *a, void *b, void *v){
+  printf("%s\n", a);
+}
+
 START_TEST(avl_basic_test){
   struct tree t;
   avl_init(&t);
@@ -67,6 +71,13 @@ START_TEST(avl_basic_test){
   ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
 
 
+  avl_apply_to_all(&t, app, NULL);
+  printf("\n\n");
+  avl_apply_to_all(&t, app, NULL);
+  printf("\n\n");
+  avl_apply_to_all(&t, app, NULL);
+  printf("\n\n");
+  avl_apply_to_all(&t, app, NULL);
   
   avl_remove(&t, str1, comp, 4);
   ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
