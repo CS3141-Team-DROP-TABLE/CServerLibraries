@@ -10,6 +10,10 @@ int comp(void *a, void *b, size_t cmp_sz){
   return memcmp(a,b,cmp_sz);
 }
 
+void del(void *a, void *b){
+  free(a);
+}
+
 START_TEST(avl_basic_test){
   struct tree t;
   avl_init(&t);
@@ -23,32 +27,42 @@ START_TEST(avl_basic_test){
   char *str7= "cxxz";
 
   cmp_func cmp = &comp;
+  all_func d = &del;
 
-
-  avl_insert(&t, str1, str1, comp, 4);
+  ck_assert_int_eq(avl_insert(&t, str1, str1, comp, 4), 1);
   ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
   ck_assert_str_eq(avl_search(&t, str1, comp, 4), str1);
 
-  avl_insert(&t, str3, str3, comp, 4);
+  ck_assert_int_eq(avl_insert(&t, str1, str1, comp, 4), 0);
+
+  
+  ck_assert_int_eq(1, avl_insert(&t, str3, str3, comp, 4));
   ck_assert_str_eq(avl_search(&t, str3, comp, 4), str3);
   ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_int_eq(0, avl_insert(&t, str3, str3, comp, 4));
   
-  avl_insert(&t, str6, str6, comp, 4);
+  
+  ck_assert_int_eq(1, avl_insert(&t, str6, str6, comp, 4));
   ck_assert_str_eq(avl_search(&t, str6, comp, 4), str6);
   ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_int_eq(0, avl_insert(&t, str6, str6, comp, 4));
   
-  avl_insert(&t, str4, str4, comp, 4);
+  ck_assert_int_eq(1, avl_insert(&t, str4, str4, comp, 4));
   ck_assert_str_eq(avl_search(&t, str4, comp, 4), str4);
   ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_int_eq(0, avl_insert(&t, str4, str4, comp, 4));
   
-  avl_insert(&t, str5, str5, comp, 4);
+  ck_assert_int_eq(1, avl_insert(&t, str5, str5, comp, 4));
   ck_assert_str_eq(avl_search(&t, str5, comp, 4), str5);
   ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_int_eq(0, avl_insert(&t, str5, str5, comp, 4));
 
-  avl_insert(&t, str2, str2, comp, 4);
+  ck_assert_int_eq(1, avl_insert(&t, str2, str2, comp, 4));
   ck_assert_str_eq(avl_search(&t, str2, comp, 4), str2);
   ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
-  avl_insert(&t, str7, str7, comp, 4);
+  ck_assert_int_eq(0, avl_insert(&t, str2, str2, comp, 4));
+
+  ck_assert_int_eq(1, avl_insert(&t, str7, str7, comp, 4));
  
   ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
 
@@ -85,6 +99,47 @@ START_TEST(avl_basic_test){
   ck_assert_ptr_eq(avl_search(&t, str7, comp, 4), NULL);
   
 
+
+  ck_assert_int_eq(avl_insert(&t, str1, str1, comp, 4), 1);
+  ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_str_eq(avl_search(&t, str1, comp, 4), str1);
+
+  ck_assert_int_eq(avl_insert(&t, str1, str1, comp, 4), 0);
+
+  
+  ck_assert_int_eq(1, avl_insert(&t, str3, str3, comp, 4));
+  ck_assert_str_eq(avl_search(&t, str3, comp, 4), str3);
+  ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_int_eq(0, avl_insert(&t, str3, str3, comp, 4));
+  
+  
+  ck_assert_int_eq(1, avl_insert(&t, str6, str6, comp, 4));
+  ck_assert_str_eq(avl_search(&t, str6, comp, 4), str6);
+  ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_int_eq(0, avl_insert(&t, str6, str6, comp, 4));
+  
+  ck_assert_int_eq(1, avl_insert(&t, str4, str4, comp, 4));
+  ck_assert_str_eq(avl_search(&t, str4, comp, 4), str4);
+  ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_int_eq(0, avl_insert(&t, str4, str4, comp, 4));
+  
+  ck_assert_int_eq(1, avl_insert(&t, str5, str5, comp, 4));
+  ck_assert_str_eq(avl_search(&t, str5, comp, 4), str5);
+  ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_int_eq(0, avl_insert(&t, str5, str5, comp, 4));
+
+  ck_assert_int_eq(1, avl_insert(&t, str2, str2, comp, 4));
+  ck_assert_str_eq(avl_search(&t, str2, comp, 4), str2);
+  ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+  ck_assert_int_eq(0, avl_insert(&t, str2, str2, comp, 4));
+
+  ck_assert_int_eq(1, avl_insert(&t, str7, str7, comp, 4));
+ 
+  ck_assert_int_eq(avl_verify_tree(&t, comp, 4) ,0);
+
+  avl_clear_tree(&t, d);
+
+  
 
 }
 END_TEST

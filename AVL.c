@@ -436,28 +436,32 @@ int insert(struct tree *t, struct tree_node *n, cmp_func cmp, size_t cmp_sz){
       mk->right = n;
     else
       mk->left = n;
+    retval = 1;
   }
 
-  mk = n;
-  
-  while(mk != NULL){
-    mk->height = max(height(mk->left), height(mk->right)) +1;
-    mk = mk->parent;
-  }
-
-  mk = n;
-
-
-  while(mk != NULL){
-    if(dif(height(mk->left), height(mk->right)) > 1){
-      rebalance(t, mk);
+  if(retval){
+    mk = n;
+    
+    while(mk != NULL){
+      mk->height = max(height(mk->left), height(mk->right)) +1;
+      mk = mk->parent;
     }
-    mk = mk->parent;
+    
+    mk = n;
+
+    
+    while(mk != NULL){
+      if(dif(height(mk->left), height(mk->right)) > 1){
+	rebalance(t, mk);
+      }
+      mk = mk->parent;
+    }
+  
+    update_node_height(t->root);
+    t->size++;
   }
-
-  update_node_height(t->root);
-
-  t->size++;
+  
+  return retval;
 }
 
 
@@ -552,18 +556,22 @@ struct tree_node *remove_node(struct tree *t, struct tree_node *x){
  * cmp_sz: the size to be compared
  *
  * Returns:
- * A pointer to the value
+ * 1 on success, 0 on failure
  */ 
 
-void *avl_insert(struct tree *t, void *key, void *value, cmp_func cmp, size_t cmp_sz){
-  pthread_mutex_lock(&t->mut);
-  void *key_store = malloc(cmp_sz);
-  memcpy(key_store, key, cmp_sz);
-  struct tree_node *n = create_node(key_store, value);
-  insert(t, n, cmp, cmp_sz);
-
-  pthread_mutex_unlock(&t->mut);
-  return value;
+int avl_insert(struct tree *t, void *key, void *value, cmp_func cmp, size_t cmp_sz){
+  int retval = 0;
+    
+  if( t != NULL && key != NULL && cmp != NULL && cmp_sz > 0) {
+    pthread_mutex_lock(&t->mut);
+    void *key_store = malloc(cmp_sz);
+    memcpy(key_store, key, cmp_sz);
+    struct tree_node *n = create_node(key_store, value);
+    retval = insert(t, n, cmp, cmp_sz);
+    
+    pthread_mutex_unlock(&t->mut);
+  }
+  return retval;
 }
 
 /**
@@ -591,9 +599,10 @@ void* avl_remove(struct tree *t, void *key, cmp_func cmp, size_t cmp_sz){
   }
 
   pthread_mutex_unlock(&t->mut);
+  return retval;
 }
 
-
+ 
 /**
  * Searches for a key in the avl tree
  * 
@@ -615,4 +624,28 @@ void *avl_search(struct tree *t, void *key, cmp_func cmp, size_t cmp_sz){
   
   pthread_mutex_unlock(&t->mut);
   return retval;
+}
+
+
+void apply_recurse(struct tree_node *x, all_func fn){
+  if(x != NULL){
+    apply_recurse(x->left, fn);
+    apply_recurse(x->right, fn);
+    fn(x->key, x->val);
+  }
+}
+
+void avl_apply_to_all(struct tree *t, all_func fn){
+  pthread_mutex_lock(&t->mut);
+  apply_recurse(t->root, fn);
+  pthread_mutex_unlock(&t->mut);
+}
+
+void avl_clear_tree(struct tree *t, all_func del){
+  pthread_mutex_lock(&t->mut);
+  apply_recurse(t->root, del);
+  t->root = NULL;
+  t->size = 0;
+
+  pthread_mutex_unlock(&t->mut);
 }

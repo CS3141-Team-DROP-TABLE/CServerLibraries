@@ -16,3 +16,8 @@ add_test(ll_test ${CMAKE_CURRENT_BINARY_DIR}/ll_test)
 add_executable(AVL_test AVL_test.c)
 target_link_libraries(AVL_test ${LIBS})
 add_test(AVL_test ${CMAKE_CURRENT_BINARY_DIR}/AVL_test)
+
+add_executable(stringMap_test stringMap_test.c)
+target_link_libraries(stringMap_test AVL stringMap ${LIBS})
+add_test(stringMap_test ${CMAKE_CURRENT_BINARY_DIR}/stringMap_test)
+
