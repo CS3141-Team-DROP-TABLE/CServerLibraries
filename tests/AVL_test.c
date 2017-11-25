@@ -10,7 +10,7 @@ int comp(void *a, void *b, size_t cmp_sz){
   return memcmp(a,b,cmp_sz);
 }
 
-void del(void *a, void *b){
+void del(void *a, void *b, void *v){
   free(a);
 }
 

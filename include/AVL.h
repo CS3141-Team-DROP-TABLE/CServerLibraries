@@ -29,13 +29,13 @@ struct tree{
  * if arg 1 is greater than arg 2
  */
 typedef int (*cmp_func)(void *, void *, size_t cmp_sz);
-typedef void (*all_func)(void *, void *);
+typedef void (*all_func)(void *, void *, void *);
 
 void avl_init(struct tree *t);
 int avl_insert(struct tree *t, void *key, void *value, cmp_func cmp, size_t cmp_sz);
 void* avl_remove(struct tree *t, void *key, cmp_func cmp, size_t cmp_sz);
 void *avl_search(struct tree *t, void *key, cmp_func cmp, size_t cmp_sz);
 int avl_verify_tree(struct tree *t, cmp_func cmp, size_t cmp_sz);
-void avl_apply_to_all(struct tree *t, all_func fn);
+void avl_apply_to_all(struct tree *t, all_func fn, void *args);
 void avl_clear_tree(struct tree *t, all_func del);
 #endif

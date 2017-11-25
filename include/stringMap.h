@@ -16,5 +16,5 @@ char *str_map_search(struct str_map *s, char *key_str);
 char *str_map_remove(struct str_map *s, char *key_str);
 int str_map_insert_str(struct str_map *s, char* key_str, char* val_str);
 void str_clear_all(struct str_map *s);
-
+void str_apply_to_all(struct str_map *s, all_func fn, void *args);
 #endif

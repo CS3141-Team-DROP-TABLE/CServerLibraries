@@ -85,7 +85,7 @@ struct tree_node *create_node(void *key, void *val){
  * key: a pointer to the key
  * cmp: a pointer to a valid cmp_func compare function
  * cmp_sz: the size of the key to compare
- *
+*
  * Returns a node with a matching key, or if none exists, the node above 
  * where it would be. Returns NULL for an empty tree
  *
@@ -627,23 +627,23 @@ void *avl_search(struct tree *t, void *key, cmp_func cmp, size_t cmp_sz){
 }
 
 
-void apply_recurse(struct tree_node *x, all_func fn){
+void apply_recurse(struct tree_node *x, all_func fn, void *args){
   if(x != NULL){
-    apply_recurse(x->left, fn);
-    apply_recurse(x->right, fn);
-    fn(x->key, x->val);
+    apply_recurse(x->left, fn, args);
+    apply_recurse(x->right, fn, args);
+    fn(x->key, x->val, args);
   }
 }
 
-void avl_apply_to_all(struct tree *t, all_func fn){
+void avl_apply_to_all(struct tree *t, all_func fn, void *args){
   pthread_mutex_lock(&t->mut);
-  apply_recurse(t->root, fn);
+  apply_recurse(t->root, fn, args);
   pthread_mutex_unlock(&t->mut);
 }
 
 void avl_clear_tree(struct tree *t, all_func del){
   pthread_mutex_lock(&t->mut);
-  apply_recurse(t->root, del);
+  apply_recurse(t->root, del, NULL);
   t->root = NULL;
   t->size = 0;
 

@@ -18,7 +18,7 @@ int default_cmp(void *a, void *b, size_t max_keysz){
   return strncmp(sa, sb, (max < max_keysz)? max : max_keysz);
 }
 
-void delete(void *a, void *b){
+void delete(void *a, void *b, void *v){
   free(b);
 }
 
@@ -68,4 +68,8 @@ char *str_map_remove(struct str_map *s, char *key_str){
 
 void str_clear_all(struct str_map *s){
   avl_clear_tree(&s->avl_tree, &delete);
+}
+
+void str_apply_to_all(struct str_map *s, all_func fn, void *args){
+  avl_apply_to_all(&s->avl_tree, fn, args);
 }
