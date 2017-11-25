@@ -20,18 +20,28 @@ void config_loader_init(struct config *c, size_t max_keysize, size_t max_valsize
 }
 
 
-
-void load_config(struct config *c, char *filename){
+void parse_line(struct config *c, char *line){
   char key[c->max_keysz];
   char val[c->max_valsz];
 
+  sscanf(line, c->scn_fmt, key, val);
+  str_map_insert_str(&c->st, key, val);
+}
+
+
+void load_config(struct config *c, char *filename){
+  char buffer[c->max_keysz+c->max_valsz+10];
+  
+  
   FILE *confFile = fopen(filename, "r");
   if(confFile == NULL){
     fprintf(stderr, "Error opening config file: %s\n", strerror(errno));
   }
 
-  while(fscanf(confFile, c->scn_fmt, key, val) != EOF){
-    str_map_insert_str(&c->st, key, val);
+  while(fgets(buffer, c->max_keysz+c->max_valsz+10, confFile) != NULL){
+    if(buffer[0] != '#' && buffer[0] != '\n'){
+      parse_line(c, buffer);
+    }
   }
 
   fclose(confFile);
