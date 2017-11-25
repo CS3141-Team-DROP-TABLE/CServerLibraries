@@ -18,6 +18,7 @@ struct target{
 char *create_packet();
 void set_src(char *packet, in_addr_t src);
 void set_dst(char *packet, in_addr_t dst);
+void set_id(char *packet, u_int16_t id);
 int create_raw_socket();
 int set_sock_opt(int sockfd);
 int send_ping(char* packet, in_addr_t dst, int sockfd);

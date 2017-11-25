@@ -88,6 +88,10 @@ char *create_packet(){
   return retval;
 }
 
+void set_id(char *packet, u_int16_t id){
+  struct icmphdr *icmp = (struct icmphdr*)(packet+sizeof(struct iphdr));
+  icmp->un.echo.id = id
+}
 void set_src(char *packet, in_addr_t src){
   struct iphdr *ip = (struct iphdr*)packet;
 
