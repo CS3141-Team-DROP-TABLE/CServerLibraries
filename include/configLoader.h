@@ -15,9 +15,9 @@ struct config{
 };
 
 void config_loader_init(struct config *c, size_t max_keysize, size_t max_valsize);
-void load_config(struct config *c, char *line);
+void load_config(struct config *c, char *filename);
 char *get_config(struct config *c, char *key);
 void clear_config(struct config *c);
 char *remove_config(struct config *c, char *key);
-
+void parse_line(struct config *c, char *line);
 #endif

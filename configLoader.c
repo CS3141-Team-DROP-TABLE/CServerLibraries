@@ -19,6 +19,9 @@ void config_loader_init(struct config *c, size_t max_keysize, size_t max_valsize
 
 }
 
+void config_parse_line(struct config *c, char *line){
+  parse_line(c, line);
+}
 
 void parse_line(struct config *c, char *line){
   char key[c->max_keysz];
