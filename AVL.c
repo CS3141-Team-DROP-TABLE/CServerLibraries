@@ -604,7 +604,6 @@ void* avl_remove(struct tree *t, void *key, cmp_func cmp, size_t cmp_sz){
     retval = mk->val;
     mk = remove_node(t, mk);
     free(mk->key);
-    printf("Freeing %p\n\n", mk);
     free(mk);
   }
 
