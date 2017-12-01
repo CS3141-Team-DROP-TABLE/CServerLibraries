@@ -536,6 +536,10 @@ struct tree_node *remove_node(struct tree *t, struct tree_node *x){
   }
 
 
+  
+  mk = (su == NULL)? x : su;
+
+  
   if(mk->parent){
     if(mk->parent->right == mk){
       mk->parent->right = NULL;
@@ -552,8 +556,6 @@ struct tree_node *remove_node(struct tree *t, struct tree_node *x){
     mk->right->parent = su;
   }
 
-  
-  mk = (su == NULL)? x : su;
   
   while(su != NULL){
     su->height = (max(height(su->left), height(su->right)))+1;
