@@ -535,6 +535,24 @@ struct tree_node *remove_node(struct tree *t, struct tree_node *x){
     
   }
 
+
+  if(mk->parent){
+    if(mk->parent->right == mk){
+      mk->parent->right = NULL;
+    } else if(mk->parent->left == mk){
+      mk->parent->left = NULL;
+    }
+  }
+
+  if(mk->left){
+    mk->left->parent = su;
+  }
+
+  if(mk->right){
+    mk->right->parent = su;
+  }
+
+  
   mk = (su == NULL)? x : su;
   
   while(su != NULL){
@@ -545,13 +563,7 @@ struct tree_node *remove_node(struct tree *t, struct tree_node *x){
     su = su->parent;
   }
 
-  if(mk->parent){
-    if(mk->parent->right == mk){
-      mk->parent->right = NULL;
-    } else if(mk->parent->left == mk){
-      mk->parent->left = NULL;
-    }
-  }
+  
     
   update_node_height(t->root);
   
