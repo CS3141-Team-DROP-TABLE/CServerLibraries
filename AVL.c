@@ -52,7 +52,7 @@ int avl_verify_tree(struct tree *t, cmp_func cmp, size_t cmp_sz){
 
 void avl_init(struct tree *t){
   t->root = NULL;
-v  t->size = 0;
+  t->size = 0;
 
   t->mut = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
   pthread_mutex_unlock(&(t->mut));
