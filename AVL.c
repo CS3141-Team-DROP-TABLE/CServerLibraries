@@ -7,6 +7,17 @@
 #include <AVL.h>
 
 
+
+void avl_intern_print(struct tree_node *mk){
+  if(mk){
+    avl_intern_print(mk->left);
+    printf("%p  : %p  l:%p r:%p\n", mk->parent, mk, mk->left, mk->right);
+    avl_intern_print(mk->right);
+    
+  }
+}
+
+
 int verify_tree_h(struct tree_node *x, cmp_func cmp, size_t cmp_sz){
 
   
@@ -41,7 +52,7 @@ int avl_verify_tree(struct tree *t, cmp_func cmp, size_t cmp_sz){
 
 void avl_init(struct tree *t){
   t->root = NULL;
-  t->size = 0;
+v  t->size = 0;
 
   t->mut = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
   pthread_mutex_unlock(&(t->mut));
@@ -603,7 +614,7 @@ void* avl_remove(struct tree *t, void *key, cmp_func cmp, size_t cmp_sz){
   if(mk != NULL && cmp(mk->key, key, cmp_sz) == 0){
     retval = mk->val;
     mk = remove_node(t, mk);
-    prinf("Free %p\n", mk);
+    printf("Free %p\n", mk);
     avl_intern_print(t->root);
     free(mk->key);
     free(mk);
@@ -659,13 +670,4 @@ void avl_clear_tree(struct tree *t, all_func del){
   t->size = 0;
 
   pthread_mutex_unlock(&t->mut);
-}
-
-void avl_intern_print(struct tree_node *mk){
-  if(mk){
-    avl_intern_print(mk->left);
-    printf("%p  : %p  l:%p r:%p\n", mk->parent, mk, mk->left, mk->right);
-    avl_intern_print(mk->right);
-    
-  }
 }
